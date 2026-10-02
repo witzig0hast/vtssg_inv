@@ -15,7 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Hinter dem Reverse-Proxy (Caddy) im Docker-Netz: Header vertrauen.
-        $middleware->trustProxies(at: env('TRUSTED_PROXIES', '*'));
+        if ($proxies = env('TRUSTED_PROXIES')) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : explode(',', $proxies));
+        }
         $middleware->append(SecurityHeaders::class);
         $middleware->web(append: [EnsureAccountReady::class]);
         $middleware->redirectGuestsTo(fn () => route('login'));

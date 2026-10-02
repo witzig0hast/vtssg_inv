@@ -48,11 +48,11 @@ class DatabaseSeeder extends Seeder
 
         // Initialer Administrator – Zugangsdaten über Umgebungsvariablen, sonst Zufallspasswort (wird einmalig ausgegeben).
         if (! User::query()->exists()) {
-            $email = env('ADMIN_EMAIL', 'admin@example.com');
-            $password = env('ADMIN_PASSWORD') ?: Str::password(20, symbols: false);
+            $email = config('inventory.admin_email');
+            $password = config('inventory.admin_password') ?: Str::password(20, symbols: false);
             $admin = User::create(['name' => 'Administrator', 'email' => $email, 'password' => $password, 'must_change_password' => true, 'is_active' => true]);
             $admin->assignRole('Administrator');
-            if (! env('ADMIN_PASSWORD')) {
+            if (! config('inventory.admin_password')) {
                 $this->command?->warn("Initialer Admin: $email / $password  (bitte sofort ändern)");
             }
         }

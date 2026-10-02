@@ -19,7 +19,16 @@ class PackingService
     {
         $code = trim($code);
 
-        return Asset::query()->where('asset_tag', $code)->orWhere('uuid', $code)->orWhere('serial', $code)->first();
+        // 1. Asset-Tag (eindeutig), 2. UUID (nur bei gültigem UUID-Format – PostgreSQL wirft sonst), 3. Seriennummer nur wenn eindeutig
+        if ($asset = Asset::query()->where('asset_tag', $code)->first()) {
+            return $asset;
+        }
+        if (\Illuminate\Support\Str::isUuid($code) && ($asset = Asset::query()->where('uuid', $code)->first())) {
+            return $asset;
+        }
+        $bySerial = Asset::query()->where('serial', $code)->limit(2)->get();
+
+        return $bySerial->count() === 1 ? $bySerial->first() : null;
     }
 
     /** @return array{item:ProjectItem,asset:Asset,message:string} */

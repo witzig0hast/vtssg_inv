@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_PASSWORD: ci, POSTGRES_DB: vtssg_ci }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: "8.3", extensions: "pdo_pgsql, pdo_sqlite, intl, gd, zip, bcmath, redis, exif", coverage: none }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: composer install --no-interaction --prefer-dist
+      - run: npm ci && npm run build
+      - run: cp .env.example .env && php artisan key:generate
+      - name: Tests (SQLite)
+        run: php artisan test
+      - name: Tests (PostgreSQL – wie in Produktion)
+        run: php artisan test
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: vtssg_ci
+          DB_USERNAME: postgres
+          DB_PASSWORD: ci
+      - name: Produktions-Caches (Routen/Views/Config)
+        run: php artisan route:cache && php artisan view:cache && php artisan config:cache && php artisan event:cache
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: "8.3", coverage: none }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: composer audit --locked
+      - run: npm audit --omit=dev --audit-level=high
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secrets und Env erzeugen
+        run: ./scripts/init.sh
+      - name: Compose validieren
+        run: docker compose --env-file .env.docker config -q
+      - name: Dockerfile-Lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with: { dockerfile: Dockerfile, ignore: "DL3018,DL3008" }
+      - name: Images bauen
+        run: docker compose --env-file .env.docker build
+      - name: Stack starten und Smoke-Test
+        run: |
+          docker compose --env-file .env.docker up -d
+          for i in $(seq 1 40); do
+            code=$(curl -sk -o /dev/null -w '%{http_code}' https://localhost/login || true)
+            [ "$code" = "200" ] && break; sleep 5
+          done
+          echo "HTTP $code"; [ "$code" = "200" ]
+          curl -skI https://localhost/login | grep -i "content-security-policy"
+          docker exec vtssg_inv02_app php artisan inv:audit-verify
+          docker compose --env-file .env.docker ps
+      - name: Logs bei Fehler
+        if: failure()
+        run: docker compose --env-file .env.docker logs --tail=200
+      - name: Trivy-Scan der App-Images
+        uses: aquasecurity/trivy-action@0.28.0
+        with: { image-ref: "vtssg_inv02_app:latest", severity: "CRITICAL,HIGH", ignore-unfixed: true, exit-code: "0" }

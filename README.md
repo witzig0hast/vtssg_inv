@@ -1,59 +1,100 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# VTSSG Inventar (`vtssg_inv02`)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Inventar- und Einsatzverwaltung für eine Veranstaltungstechnik-Firma – inspiriert von Snipe-IT, aber auf den Alltag
+zwischen Lager, Werkstatt und Bühne zugeschnitten: **Projekte, Packlisten, Scan-Beladung, DGUV-V3-/Rigging-Prüffristen,
+Defekt-Tickets, Inventur und ein manipulationssicheres Audit-Log.**
 
-## About Laravel
+Stack: Laravel 12 · PHP 8.3-FPM · PostgreSQL 16 · Redis · Caddy (TLS) · Tailwind 4 · vollständig in Docker.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Funktionsumfang
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Bereich | Highlights |
+|---|---|
+| **Equipment** | Assets mit Tag/QR/Seriennummer, Modelle, Kategorien, Hersteller, Lieferanten, Standortbaum (Lager → Regal, Fahrzeug, Venue), Status-Labels, **Cases/Kits** (Inhalt wird mit ausgegeben), **Mengenartikel** (z. B. 200 XLR-Kabel), Verbrauchsmaterial mit Mindestbestand, Dateianhänge (Handbücher, Protokolle) |
+| **Einsatz** | Projekte mit Zeitfenster, **Reservierung & Verfügbarkeitsprüfung** über Projekte hinweg, Packlisten mit Gruppen, **Vorlagen** („PA klein“), **Zumiete**, Projekt-Kalender, Duplizieren, **Lieferschein- und Packlisten-PDF**, Mietwert-Berechnung |
+| **Scannen** | Kamera-Scanner (PWA) und Handscanner (Tastatur-Modus); Beladen/Rückbau mit Soll/Ist-Fortschritt, Ton-/Vibrations-Feedback, Offline-Warteschlange; Schnellausgabe/-rücknahme |
+| **Sicherheit & Wartung** | Prüfarten (DGUV V3, Rigging/Sachkundiger, Kettenzug …) je Modell mit Intervall; **überfällige Prüfung sperrt die Ausgabe**; „nicht bestanden“ sperrt das Gerät und erzeugt ein Ticket; Betriebsstunden/Lampenlebensdauer; Wartungstickets mit Kosten; Rückgabe „defekt“ → automatisch Ticket + Sperre |
+| **Inventur** | Soll/Ist-Abgleich per Scan, unerwartete Funde, Abschlussprotokoll |
+| **Auswertung** | Dashboard, Bestand/Buchwert (lineare Abschreibung), Lebenszykluskosten je Einsatz, tägliche E-Mail zu fälligen Prüfungen & Mindestbeständen |
+| **Integration** | REST-API (`/api/v1`, Bearer-Token), CSV-Import (atomar, mit Testlauf) und -Export |
+| **Administration** | Rollen (Administrator, Lager, Projektleitung, Techniker, Nur Lesen) mit feingranularen Rechten, Benutzerverwaltung, Einstellungen |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Schnellstart (Docker)
 
-## Learning Laravel
+```bash
+make init        # erzeugt ./secrets/* und .env.docker (Zufallspasswörter, App-Key)
+$EDITOR .env.docker   # APP_DOMAIN, MAIL_*, ADMIN_EMAIL anpassen
+make up          # baut und startet alle Container
+make ps          # Health-Status
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Danach: `https://<APP_DOMAIN>` (lokal: `https://localhost`, Zertifikat der Caddy-eigenen CA).
+Das initiale Admin-Passwort gibt `make init` aus; beim ersten Login muss es geändert werden. Mit
+`INV_REQUIRE_2FA=true` (Standard im Docker-Beispiel) muss außerdem 2FA eingerichtet werden.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Container
 
-## Laravel Sponsors
+Alle Ressourcen tragen das Präfix **`vtssg_inv02_`** (Docker erlaubt keine führenden Unterstriche in Namen):
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Container | Aufgabe | Netz |
+|---|---|---|
+| `vtssg_inv02_web` | Caddy: TLS, HSTS, statische Dateien, Proxy zu PHP-FPM | frontend |
+| `vtssg_inv02_app` | PHP-FPM, führt Migrationen/Erstinstallation aus | frontend + backend |
+| `vtssg_inv02_queue` | Queue-Worker (E-Mail-Versand) | frontend + backend |
+| `vtssg_inv02_scheduler` | Zeitplan: Prüf-Erinnerungen, Neuberechnung, Audit-Verifikation | frontend + backend |
+| `vtssg_inv02_db` | PostgreSQL 16 (SCRAM, Prüfsummen) | **backend (intern)** |
+| `vtssg_inv02_redis` | Cache & Queue (Passwort) | **backend (intern)** |
+| `vtssg_inv02_backup` | Täglich verschlüsselte Sicherung (DB + Dateien) | backend (intern) |
+| `vtssg_inv02_mailpit` | Mail-Catcher, nur `--profile dev` | frontend |
 
-### Premium Partners
+Netze `vtssg_inv02_frontend` / `vtssg_inv02_backend` (**internal: true** – DB und Redis haben keinen Internetzugang),
+Volumes `vtssg_inv02_{pgdata,redisdata,storage,backups,caddy_data,caddy_config}`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Betrieb
 
-## Contributing
+```bash
+make logs                       # Logs
+make artisan c="inv:audit-verify"   # Hash-Kette des Audit-Logs prüfen
+make admin email=chef@firma.de  # Administrator anlegen / Passwort zurücksetzen
+make backup                     # Sofort-Backup  → Volume vtssg_inv02_backups
+make restore f=vtssg_inv02-20260101-020000.tar.enc
+make update                     # git pull, Backup, neu bauen, starten
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Backups (`*.tar.enc`) sind mit AES-256 (PBKDF2, 600 000 Iterationen) verschlüsselt, per SHA-256 gesichert und werden
+`BACKUP_KEEP_DAYS` Tage aufbewahrt. **Die Datei `secrets/backup_passphrase` extern sichern** – ohne sie sind Backups unlesbar.
+Backups regelmäßig vom Server wegkopieren (`docker cp vtssg_inv02_backup:/backups ./offsite`).
 
-## Code of Conduct
+## Sicherheit
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Siehe [`docs/SECURITY.md`](docs/SECURITY.md). Kurzfassung: Argument-Härtung der Container (read-only, `cap_drop: ALL`,
+no-new-privileges, Nicht-Root), Docker-Secrets statt Umgebungsvariablen, isoliertes Backend-Netz, striktes CSP,
+TLS/HSTS, 2FA (TOTP + Recovery-Codes), Lockout/Rate-Limiting, verschlüsselte Sessions, Rollen/Rechte auf jeder Route,
+Hash-verkettetes Audit-Log, sichere Datei-Uploads, CSV-Injection-Schutz.
 
-## Security Vulnerabilities
+## Entwicklung (ohne Docker)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer install && npm ci
+cp .env.example .env && php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed            # legt Basisdaten + Admin an (Passwort wird ausgegeben)
+php artisan db:seed --class=DemoSeeder   # optional: Beispieldaten
+npm run build && php artisan serve    # oder: npm run dev
+php artisan test                      # 38 Tests (SQLite); CI testet zusätzlich gegen PostgreSQL
+```
 
-## License
+## Wichtige Konzepte
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+* **Asset vs. Modell**: Ein *Modell* („Robe MegaPointe“) definiert Preis, Prüfpflichten, Lebensdauer. Ein *Asset* ist das
+  konkrete Gerät (Tag `VT-000123`). Mengenartikel haben ein Asset mit Stückzahl.
+* **Verfügbarkeit**: Zählt alle ausgebbaren, nicht gesperrten Assets eines Modells minus Reservierungen *überlappender*
+  Projekte (Status geplant → im Einsatz). Konflikte werden am Projekt angezeigt und blockieren „Bestätigt“.
+* **Prüfungen**: Fälligkeit = letzte bestandene Prüfung + Intervall (ohne Prüfung: Kaufdatum + Intervall). Prüfarten mit
+  „sperrt Ausgabe“ verhindern Check-out und Verladen, solange sie überfällig sind.
+* **Audit-Log**: Jede Änderung wird mit Benutzer/IP protokolliert und per HMAC-Kette gesichert. `inv:audit-verify` (täglich
+  automatisch) erkennt nachträgliche Änderungen oder Löschungen.
+
+## Lizenz / Hinweis
+
+Eigenentwicklung, nicht von Snipe-IT abgeleitet (kein Code übernommen).

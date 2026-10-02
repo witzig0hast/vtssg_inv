@@ -50,7 +50,7 @@ class AuditLog extends Model
             $request = app()->bound('request') ? request() : null;
 
             $row = [
-                'user_id' => auth()->id(),
+                'user_id' => $request?->user()?->id ?? auth()->id(),
                 'event' => $event,
                 'auditable_type' => $subject ? $subject->getMorphClass() : null,
                 'auditable_id' => $subject?->getKey(),

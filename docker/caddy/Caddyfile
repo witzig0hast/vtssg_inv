@@ -1,0 +1,49 @@
+{
+	admin off
+	{$CADDY_GLOBAL:}
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+# Interner Healthcheck (nicht veröffentlicht)
+:8080 {
+	bind 127.0.0.1
+	respond /healthz 200
+}
+
+{$APP_DOMAIN:localhost} {
+	# TLS: für öffentliche Domains automatisch Let's Encrypt;
+	# im lokalen Netz CADDY_TLS="tls internal" setzen (Caddy-eigene CA).
+	{$CADDY_TLS:}
+
+	root * /var/www/html/public
+	encode zstd gzip
+
+	request_body {
+		max_size 15MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+		-X-Powered-By
+	}
+
+	# Sensible Pfade nie ausliefern
+	@blocked {
+		path /.* /storage/* /vendor/* /*.php~ /composer.* /artisan
+		not path /.well-known/*
+	}
+	respond @blocked 404
+
+	# Gehashte Build-Assets dauerhaft cachen
+	@build path /build/*
+	header @build Cache-Control "public, max-age=31536000, immutable"
+
+	php_fastcgi vtssg_inv02_app:9000 {
+		capture_stderr
+	}
+
+	file_server
+}
