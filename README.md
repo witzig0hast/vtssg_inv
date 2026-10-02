@@ -67,7 +67,7 @@ Backups regelmäßig vom Server wegkopieren (`docker cp vtssg_inv02_backup:/back
 
 ## Sicherheit
 
-Siehe [`docs/SECURITY.md`](docs/SECURITY.md). Kurzfassung: Argument-Härtung der Container (read-only, `cap_drop: ALL`,
+Siehe [`docs/SECURITY.md`](docs/SECURITY.md). Kurzfassung: Härtung der Container (read-only, `cap_drop: ALL`,
 no-new-privileges, Nicht-Root), Docker-Secrets statt Umgebungsvariablen, isoliertes Backend-Netz, striktes CSP,
 TLS/HSTS, 2FA (TOTP + Recovery-Codes), Lockout/Rate-Limiting, verschlüsselte Sessions, Rollen/Rechte auf jeder Route,
 Hash-verkettetes Audit-Log, sichere Datei-Uploads, CSV-Injection-Schutz.
