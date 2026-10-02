@@ -58,6 +58,7 @@ class MasterData
                     ['type', 'Typ', 'select', 'required|in:'.implode(',', array_keys(Location::TYPES)), Location::TYPES],
                     ['parent_id', 'Übergeordnet', 'select', 'nullable|exists:locations,id', fn () => Location::orderBy('name')->get()->mapWithKeys(fn ($l) => [$l->id => $l->path])->all(), true],
                     ['address', 'Adresse', 'text', 'nullable|string|max:255'],
+                    ['max_load_kg', 'Max. Zuladung (kg, nur Fahrzeuge)', 'number', 'nullable|integer|min:1|max:100000'],
                     ['notes', 'Notizen', 'textarea', 'nullable|string|max:2000'],
                 ],
             ],

@@ -24,7 +24,7 @@ class Project extends Model
 
     protected function casts(): array
     {
-        return ['setup_at' => 'datetime', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'teardown_at' => 'datetime'];
+        return ['setup_at' => 'datetime', 'starts_at' => 'datetime', 'ends_at' => 'datetime', 'teardown_at' => 'datetime', 'signed_at' => 'datetime'];
     }
 
     public function customer() { return $this->belongsTo(Customer::class); }

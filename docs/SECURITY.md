@@ -24,6 +24,14 @@
   private Ablage (nicht im Web-Root), Auslieferung als Download mit `nosniff` und `sandbox`-CSP, SHA-256 gespeichert.
 * CSV-Export neutralisiert Formel-Injection (`= + - @`); CSV-Import ist atomar mit Zeilenlimit.
 
+## Zusatzfunktionen
+* **Webhooks**: nur `https`, Ziel wird aufgelöst und gegen private/reservierte/Link-Local-Adressen geprüft (SSRF), keine Redirects,
+  Nutzdaten per HMAC-SHA256 signiert (`X-Inventory-Signature`), Secret verschlüsselt gespeichert, Zustellung über die Queue mit Backoff.
+* **iCal-Abo**: 48-stelliger Zufallstoken je Benutzer, jederzeit widerruf-/erneuerbar, nur Lesezugriff auf Termine, Rate-Limit.
+* **Gerätepass** (öffentlich): UUID-basiert (nicht erratbar), nur Modell, Tag, Prüfstatus, Eigentümer – keine Seriennummer/Preise/Notizen.
+* **Unterschrift**: nur echte PNG-Dateien (Magic-Bytes + Bildparser, ≤ 300 KB), privat gespeichert, Erfassung im Audit-Log.
+* **Rider-Import**: Dateityp-/Größenlimit, nichts wird ohne Bestätigung übernommen.
+
 ## Audit-Log
 Append-only-Tabelle; jeder Eintrag enthält `prev_hash` und `hash = HMAC-SHA256(APP_KEY, Inhalt || prev_hash)`.
 Änderung oder Löschung (auch direkt per SQL) bricht die Kette → `php artisan inv:audit-verify` (täglich 03:15 automatisch,

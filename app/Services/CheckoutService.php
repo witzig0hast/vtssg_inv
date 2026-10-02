@@ -28,6 +28,7 @@ class CheckoutService
             $this->assertCheckoutAllowed($asset, $qty);
 
             $checkout = $this->create($asset, $assigneeType, $assigneeId, $by, $qty, $opts);
+            \App\Services\Webhook::fire('asset.checked_out', ['asset_tag' => $asset->asset_tag, 'assignee_type' => $assigneeType, 'assignee_id' => $assigneeId, 'quantity' => $qty, 'by' => $by?->email]);
 
             if ($asset->is_container) {
                 foreach ($asset->children()->with('status', 'model.inspectionTypes')->get() as $child) {
@@ -107,6 +108,8 @@ class CheckoutService
                 $this->logHours($asset, (float) $opts['hours'], $by, $checkout->project_id, 'Rückgabe');
             }
 
+            \App\Services\Webhook::fire('asset.checked_in', ['asset_tag' => $asset->asset_tag, 'condition' => $condition, 'by' => $by?->email]);
+
             if ($condition === 'damaged') {
                 $this->reportDefect($asset, $by, 'Bei Rückgabe als defekt gemeldet', $note, $checkout->project_id);
             }
@@ -137,9 +140,12 @@ class CheckoutService
             $asset->forceFill(['status_label_id' => $label->id])->save();
         }
 
-        return MaintenanceTicket::create([
+        $ticket = MaintenanceTicket::create([
             'asset_id' => $asset->id, 'reported_by' => $by?->id, 'project_id' => $projectId,
             'title' => $title, 'description' => $description, 'priority' => $priority, 'status' => 'open', 'blocks_asset' => true,
         ]);
+        \App\Services\Webhook::fire('ticket.created', ['ticket_id' => $ticket->id, 'asset_tag' => $asset->asset_tag, 'title' => $title, 'priority' => $priority]);
+
+        return $ticket;
     }
 }

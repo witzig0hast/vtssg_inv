@@ -44,6 +44,7 @@ class SmokeTest extends TestCase
             '/projects', '/projects?status=planned', '/projects/calendar', '/projects/calendar?month=2026-12', '/projects/create', "/projects/{$project->id}", "/projects/{$project->id}/edit", "/projects/{$project->id}/pack",
             "/projects/{$project->id}/document/delivery-note", "/projects/{$project->id}/document/packing-list",
             '/kits', '/kits/create', "/kits/{$kit->id}/edit",
+            "/projects/{$project->id}/rider", "/projects/{$project->id}/signature", '/accounting/afa', "/accounting/invoice/{$project->id}", '/accounting/revenue?from=2026-01-01&to=2026-12-31', '/pass/'.$asset->uuid,
             '/inspections', '/inspections?scope=overdue', '/inspections?scope=all', '/inspections/create', "/inspections/create?asset={$asset->id}",
             '/maintenance', '/maintenance?status=all', '/maintenance/create', "/maintenance/create?asset={$asset->id}", "/maintenance/{$ticket->id}",
             '/stocktakes', "/stocktakes/{$st->id}", '/reports', '/audit', '/audit?verify=1&event=login', '/users', '/users/create', "/users/{$admin->id}/edit", '/settings',

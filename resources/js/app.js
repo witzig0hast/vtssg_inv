@@ -215,3 +215,54 @@ if (addRow) {
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
+
+// ── NFC (Web NFC, Chrome auf Android): Tags lesen/beschreiben ───
+if ('NDEFReader' in window) {
+    // Lese-Button neben jedem Kamera-Button
+    $$('[data-camera-for]').forEach((cam) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'btn'; b.textContent = 'NFC'; b.title = 'NFC-Tag lesen';
+        cam.after(b);
+        b.addEventListener('click', async () => {
+            const input = document.getElementById(cam.dataset.cameraFor);
+            b.textContent = '… Tag halten';
+            try {
+                const reader = new NDEFReader();
+                const ctl = new AbortController();
+                await reader.scan({ signal: ctl.signal });
+                reader.onreading = (ev) => {
+                    const rec = ev.message.records.find((r) => r.recordType === 'text' || r.recordType === 'url');
+                    const code = rec ? new TextDecoder(rec.encoding || 'utf-8').decode(rec.data).trim() : ev.serialNumber;
+                    ctl.abort(); b.textContent = 'NFC';
+                    input.value = code; input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+                    if (cam.dataset.submit !== undefined) input.form?.requestSubmit();
+                };
+            } catch (_) { b.textContent = 'NFC'; }
+        });
+    });
+    // Beschreiben
+    $$('[data-nfc-write]').forEach((b) => {
+        b.classList.remove('hidden');
+        b.addEventListener('click', async () => {
+            try { await new NDEFReader().write({ records: [{ recordType: 'text', data: b.dataset.nfcWrite }] }); b.textContent = '✓ Beschrieben'; }
+            catch (_) { b.textContent = 'Fehlgeschlagen'; }
+        });
+    });
+}
+
+// ── Unterschriftenfeld ──────────────────────────────────────────
+const sigCanvas = $('#sig-canvas');
+if (sigCanvas) {
+    const ctx = sigCanvas.getContext('2d');
+    ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#111';
+    let drawing = false; let dirty = false;
+    const pos = (e) => { const r = sigCanvas.getBoundingClientRect(); return [(e.clientX - r.left) * sigCanvas.width / r.width, (e.clientY - r.top) * sigCanvas.height / r.height]; };
+    sigCanvas.addEventListener('pointerdown', (e) => { drawing = true; sigCanvas.setPointerCapture(e.pointerId); const [x, y] = pos(e); ctx.beginPath(); ctx.moveTo(x, y); });
+    sigCanvas.addEventListener('pointermove', (e) => { if (!drawing) return; const [x, y] = pos(e); ctx.lineTo(x, y); ctx.stroke(); dirty = true; });
+    ['pointerup', 'pointercancel'].forEach((ev) => sigCanvas.addEventListener(ev, () => { drawing = false; }));
+    $('#sig-clear').addEventListener('click', () => { ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); dirty = false; });
+    $('#sig-form').addEventListener('submit', (e) => {
+        if (!dirty) { e.preventDefault(); alert('Bitte zuerst unterschreiben.'); return; }
+        $('#sig-image').value = sigCanvas.toDataURL('image/png');
+    });
+}

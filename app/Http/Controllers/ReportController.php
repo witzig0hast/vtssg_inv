@@ -40,7 +40,26 @@ class ReportController extends Controller
             return ['asset' => $a, 'total' => $total, 'repairs' => (int) ($repairs[$a->id] ?? 0), 'uses' => $n, 'per_use' => $n ? (int) round($total / $n) : null];
         })->sortByDesc('total')->take(15);
 
+        // Verschleißprognose: Ersatzbedarf nach Betriebsstunden-Tempo (letzte 12 Monate) und nach Abschreibungsende
+        $rate = \App\Models\UsageLog::where('created_at', '>=', now()->subYear())->select('asset_id', DB::raw('SUM(hours) as h'))->groupBy('asset_id')->pluck('h', 'asset_id');
+        $forecast = $assets->map(function ($a) use ($rate) {
+            $dates = [];
+            if (($rem = $a->serviceHoursRemaining()) !== null) {
+                $perDay = ((float) ($rate[$a->id] ?? 0)) / 365;
+                $dates['Lebensdauer (Betriebsstunden)'] = $perDay > 0 ? now()->addDays((int) min(3650, ceil($rem / $perDay))) : null;
+            }
+            if ($a->model->depreciation_months && $a->purchase_date) {
+                $dates['Abschreibung'] = $a->purchase_date->copy()->addMonths($a->model->depreciation_months);
+            }
+            $dates = array_filter($dates);
+            if (! $dates) return null;
+            asort($dates);
+
+            return ['asset' => $a, 'reason' => array_key_first($dates), 'date' => reset($dates)];
+        })->filter()->filter(fn ($r) => $r['date']->lte(now()->addYears(2)))->sortBy(fn ($r) => $r['date']->timestamp)->take(20);
+
         return view('reports.index', [
+            'forecast' => $forecast,
             'byCategory' => $byCategory, 'totalValue' => $byCategory->sum('value'), 'bookValue' => $book, 'lifecycle' => $lifecycle,
             'projectsByMonth' => Project::whereNotIn('status', ['cancelled', 'draft'])->get()->groupBy(fn ($p) => ($p->starts_at ?? $p->setup_at ?? $p->created_at)->format('Y-m'))->map->count()->sortKeys()->take(-12),
             'utilization' => Checkout::whereNotNull('project_id')->where('checked_out_at', '>=', now()->subYear())->count(),

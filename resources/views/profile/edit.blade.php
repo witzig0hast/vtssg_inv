@@ -47,6 +47,17 @@
             </div>
         </div>
 
+        @can('projects.view')
+        <div class="card"><div class="card-h"><h2>Kalender-Abo (iCal)</h2></div>
+            <div class="card-b space-y-3 text-sm">
+                @if ($user->ical_token)<p>Abonniere diese URL in Outlook/Google/Apple-Kalender:</p><code class="block break-all rounded bg-slate-100 p-2 text-xs">{{ route('ical.feed', $user->ical_token) }}</code>
+                    <div class="flex gap-2"><form method="post" action="{{ route('profile.ical.regenerate') }}">@csrf<button class="btn btn-sm">Neuen Link erzeugen</button></form>
+                    <form method="post" action="{{ route('profile.ical.revoke') }}">@csrf @method('DELETE')<button class="btn btn-sm btn-danger">Widerrufen</button></form></div>
+                    <p class="hint">Wer den Link kennt, sieht Projekttermine (ohne Anmeldung). Bei Verdacht auf Weitergabe neu erzeugen.</p>
+                @else<p class="text-slate-600">Projekttermine im eigenen Kalender anzeigen.</p><form method="post" action="{{ route('profile.ical.regenerate') }}">@csrf<button class="btn btn-primary btn-sm">Link erzeugen</button></form>@endif
+            </div></div>
+        @endcan
+
         <div class="card"><div class="card-h"><h2>API-Tokens</h2></div>
             <div class="card-b space-y-4">
                 @if ($newToken)<div class="alert border-amber-200 bg-amber-50 text-amber-900">Neuer Token (wird nur einmal angezeigt):<br><code class="break-all font-mono text-xs">{{ $newToken }}</code></div>@endif

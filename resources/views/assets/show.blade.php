@@ -58,6 +58,7 @@
             <div class="card card-b text-center">
                 <div class="mx-auto h-40 w-40">{!! \App\Support\Qr::svg($asset->qrPayload()) !!}</div>
                 <div class="mt-2 font-mono text-sm">{{ $asset->asset_tag }}</div>
+                <div class="mt-2 flex flex-wrap justify-center gap-2"><button type="button" class="btn btn-sm hidden" data-nfc-write="{{ $asset->asset_tag }}">NFC-Tag beschreiben</button><a class="btn btn-sm" href="{{ route('pass', $asset->uuid) }}" target="_blank" rel="noopener">Gerätepass</a></div>
             </div>
 
             <div class="card"><div class="card-h"><h2>Prüfungen</h2></div>
@@ -70,6 +71,10 @@
                     @foreach ($inspections->take(5) as $i)<div class="py-0.5">{{ $i->performed_at->format('d.m.Y') }} · {{ $i->type->code }} · {{ \App\Models\Inspection::RESULTS[$i->result] }}@if($i->protocol_number) · {{ $i->protocol_number }}@endif</div>@endforeach</div>@endif
             </div>
 
+            @if ($asset->model->service_hours_limit)
+            @can('assets.checkout')<div class="card"><div class="card-h"><h2>Betriebsstunden</h2><span class="text-sm text-slate-500">{{ number_format($asset->operating_hours, 1, ',', '.') }} / {{ $asset->model->service_hours_limit }} h</span></div>
+                <form method="post" action="{{ route('assets.hours', $asset) }}" class="card-b flex gap-2">@csrf<input type="number" step="0.1" min="0.1" name="hours" placeholder="Stunden" class="input" required><button class="btn">Buchen</button></form></div>@endcan
+            @endif
             <div class="card"><div class="card-h"><h2>Wartung</h2></div>
                 <ul class="divide-y divide-slate-100 text-sm">@forelse ($tickets as $t)<li class="px-5 py-2.5"><a href="{{ route('maintenance.show', $t) }}">{{ $t->title }}</a><div class="text-xs text-slate-500">{{ \App\Models\MaintenanceTicket::STATUSES[$t->status] }} · {{ $t->created_at->format('d.m.Y') }}</div></li>@empty<li class="px-5 py-3 text-slate-500">Keine Tickets.</li>@endforelse</ul>
             </div>

@@ -90,6 +90,9 @@ class ProjectController extends Controller
             'groups' => $project->items->groupBy(fn ($i) => $i->group ?: 'Allgemein'),
             'progress' => $total ? round($packed / $total * 100) : 0,
             'rentalSum' => $rentalSum,
+            'weightKg' => $project->items->where('is_external', false)->sum(fn ($i) => (float) ($i->model?->weight_kg ?? 0) * $i->quantity),
+            'powerW' => $project->items->where('is_external', false)->sum(fn ($i) => (int) ($i->model?->power_w ?? 0) * $i->quantity),
+            'vehicles' => Location::where('type', 'vehicle')->whereNotNull('max_load_kg')->orderBy('name')->get(),
             'models' => AssetModel::with('manufacturer')->orderBy('name')->get(),
             'suppliers' => Supplier::orderBy('name')->get(),
             'templates' => KitTemplate::orderBy('name')->get(),
@@ -136,6 +139,7 @@ class ProjectController extends Controller
             return back()->withErrors(['status' => 'Abschluss nicht möglich: Es ist noch Material ausgegeben.']);
         }
         $project->update(['status' => $to]);
+        \App\Services\Webhook::fire('project.status_changed', ['number' => $project->number, 'name' => $project->name, 'status' => $to]);
 
         return back()->with('status', 'Status: '.Project::STATUSES[$to]);
     }
@@ -297,7 +301,12 @@ class ProjectController extends Controller
         $project->load(['customer', 'manager', 'items.model.manufacturer', 'items.asset', 'items.supplier', 'venueLocation']);
         $items = $project->items->groupBy(fn ($i) => $i->group ?: 'Allgemein');
 
+        $sig = $project->attachments()->where('label', 'Unterschrift')->latest()->first();
+        $sigData = $sig && \Illuminate\Support\Facades\Storage::disk($sig->disk)->exists($sig->path)
+            ? 'data:image/png;base64,'.base64_encode(\Illuminate\Support\Facades\Storage::disk($sig->disk)->get($sig->path)) : null;
+
         $pdf = Pdf::loadView('projects.pdf-'.$type, [
+            'signature' => $sigData,
             'project' => $project, 'groups' => $items, 'company' => Setting::get('company_name'), 'companyAddress' => Setting::get('company_address'),
         ])->setPaper('a4');
 

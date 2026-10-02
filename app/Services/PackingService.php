@@ -104,6 +104,7 @@ class PackingService
         };
         if ($new !== $project->status) {
             $project->update(['status' => $new]);
+            Webhook::fire('project.status_changed', ['number' => $project->number, 'name' => $project->name, 'status' => $new]);
         }
     }
 }

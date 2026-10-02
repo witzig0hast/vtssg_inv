@@ -20,6 +20,8 @@ class Setting extends Model
         'asset_tag_digits' => '6',
         'inspection_warn_days' => '30',
         'notify_email' => '',
+        'revenue_account' => '8400',
+        'webhook_url' => '',
     ];
 
     public static function get(string $key, ?string $default = null): ?string

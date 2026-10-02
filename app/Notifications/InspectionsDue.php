@@ -12,7 +12,7 @@ class InspectionsDue extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Collection $overdue, public Collection $soon, public Collection $lowStock) {}
+    public function __construct(public Collection $overdue, public Collection $soon, public Collection $lowStock, public Collection $lateReturns = new Collection) {}
 
     public function via(object $notifiable): array
     {
@@ -33,6 +33,12 @@ class InspectionsDue extends Notification implements ShouldQueue
             $m->line('**Bald fällig:**');
             foreach ($this->soon->take(25) as $a) {
                 $m->line("- {$a->asset_tag} {$a->model->full_name} – {$a->next_inspection_due->format('d.m.Y')}");
+            }
+        }
+        if ($this->lateReturns->isNotEmpty()) {
+            $m->line('**Überfällige Rückgaben:**');
+            foreach ($this->lateReturns->take(25) as $c) {
+                $m->line("- {$c->asset->asset_tag} {$c->asset->model->full_name} – {$c->assigneeLabel()} (fällig {$c->expected_return_at->format('d.m.Y')})");
             }
         }
         if ($this->lowStock->isNotEmpty()) {

@@ -16,7 +16,12 @@ Stack: Laravel 12 · PHP 8.3-FPM · PostgreSQL 16 · Redis · Caddy (TLS) · Tai
 | **Sicherheit & Wartung** | Prüfarten (DGUV V3, Rigging/Sachkundiger, Kettenzug …) je Modell mit Intervall; **überfällige Prüfung sperrt die Ausgabe**; „nicht bestanden“ sperrt das Gerät und erzeugt ein Ticket; Betriebsstunden/Lampenlebensdauer; Wartungstickets mit Kosten; Rückgabe „defekt“ → automatisch Ticket + Sperre |
 | **Inventur** | Soll/Ist-Abgleich per Scan, unerwartete Funde, Abschlussprotokoll |
 | **Auswertung** | Dashboard, Bestand/Buchwert (lineare Abschreibung), Lebenszykluskosten je Einsatz, tägliche E-Mail zu fälligen Prüfungen & Mindestbeständen |
-| **Integration** | REST-API (`/api/v1`, Bearer-Token), CSV-Import (atomar, mit Testlauf) und -Export |
+| **Integration** | REST-API (`/api/v1`, Bearer-Token), **signierte Webhooks** (HMAC, SSRF-geschützt, Zustellprotokoll) für Rentman/n8n/Slack-Brücken, **iCal-Kalender-Abo** pro Benutzer, CSV-Import (atomar, mit Testlauf) und -Export |
+| **Rider & Logistik** | **Tech-Rider-Import** (Text/PDF → Modell-Vorschläge mit Verfügbarkeit, Rest als Zumiete), Gesamtgewicht/Leistung je Projekt mit **Fahrzeug-Zuladungsprüfung**, **Beladefotos** (Case-Check), **digitale Kunden-Unterschrift** auf dem Lieferschein |
+| **Buchhaltung** | Anlagenspiegel mit AfA (CSV), Rechnungsposten je Projekt, Erlösbuchungen im DATEV-ähnlichen Stil (Konten/Format mit Steuerberater abstimmen) |
+| **Mobil/NFC** | Web-NFC: Tags lesen und beschreiben (Chrome/Android); RFID-Handleser im Tastatur-Modus funktionieren am Scan-Feld |
+| **Gerätepass** | Öffentliche, minimale Seite je Gerät (`/pass/<uuid>`): Prüfstatus und Eigentümer – ohne Seriennummer/Preise |
+| **Prognose** | Ersatzbedarf (24 Monate) aus Betriebsstunden-Tempo und Abschreibung; Erinnerungs-Mail auch für überfällige Rückgaben |
 | **Administration** | Rollen (Administrator, Lager, Projektleitung, Techniker, Nur Lesen) mit feingranularen Rechten, Benutzerverwaltung, Einstellungen |
 
 ## Schnellstart (Docker)
@@ -81,7 +86,7 @@ touch database/database.sqlite
 php artisan migrate --seed            # legt Basisdaten + Admin an (Passwort wird ausgegeben)
 php artisan db:seed --class=DemoSeeder   # optional: Beispieldaten
 npm run build && php artisan serve    # oder: npm run dev
-php artisan test                      # 38 Tests (SQLite); CI testet zusätzlich gegen PostgreSQL
+php artisan test                      # 51 Tests (SQLite); CI testet zusätzlich gegen PostgreSQL
 ```
 
 ## Wichtige Konzepte

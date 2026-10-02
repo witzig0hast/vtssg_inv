@@ -15,6 +15,11 @@
                 <div><div class="mb-1 flex justify-between text-sm"><span>Fortschritt</span><span id="pack-progress">{{ $items->sum('packed_quantity') }} / {{ $items->sum('quantity') }}</span></div>
                     <div class="h-3 overflow-hidden rounded-full bg-slate-200"><div id="pack-bar" class="h-full bg-brand-600 transition-all" style="width: {{ $items->sum('quantity') ? round($items->sum('packed_quantity') / $items->sum('quantity') * 100) : 0 }}%"></div></div></div>
             </div>
+            <form method="post" action="{{ route('projects.photo', $project) }}" enctype="multipart/form-data" class="card card-b flex flex-wrap items-center gap-2">@csrf
+                <span class="text-sm font-medium">Beladefoto (Case-Check)</span>
+                <input type="file" name="photo" accept="image/*" capture="environment" required class="text-sm">
+                <input name="label" placeholder="Case / Hinweis" class="input w-40"><button class="btn btn-sm">Speichern</button>
+            </form>
             <ul id="pack-log" class="space-y-2"></ul>
         </div>
         <div class="card"><div class="card-h"><h2>Soll-Liste</h2></div>

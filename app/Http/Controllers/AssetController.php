@@ -129,6 +129,14 @@ class AssetController extends Controller
         return redirect()->route('assets.index')->with('status', "Asset {$asset->asset_tag} gelöscht.");
     }
 
+    public function hours(Request $request, Asset $asset, \App\Services\CheckoutService $svc)
+    {
+        $d = $request->validate(['hours' => ['required', 'numeric', 'min:0.1', 'max:10000'], 'note' => ['nullable', 'string', 'max:120']]);
+        $svc->logHours($asset, (float) $d['hours'], $request->user(), null, $d['note'] ?? 'manuell');
+
+        return back()->with('status', 'Betriebsstunden gebucht.');
+    }
+
     public function block(Request $request, Asset $asset)
     {
         $data = $request->validate(['blocked' => ['required', 'boolean'], 'reason' => ['nullable', 'string', 'max:200']]);

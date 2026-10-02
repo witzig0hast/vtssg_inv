@@ -5,6 +5,9 @@
         @can('projects.pack')<a href="{{ route('projects.pack', $project) }}" class="btn btn-primary">Packen / Rückbau</a>@endcan
         <a href="{{ route('projects.document', [$project, 'packing-list']) }}" class="btn" target="_blank">Packliste PDF</a>
         <a href="{{ route('projects.document', [$project, 'delivery-note']) }}" class="btn" target="_blank">Lieferschein PDF</a>
+        @can('reports.view')<a href="{{ route('accounting.invoice', $project) }}" class="btn">Rechnungsposten CSV</a>@endcan
+        @can('projects.pack')<a href="{{ route('projects.signature', $project) }}" class="btn">Unterschrift</a>@endcan
+        @can('projects.update')<a href="{{ route('projects.rider', $project) }}" class="btn">Rider importieren</a>@endcan
         @can('projects.update')<a href="{{ route('projects.edit', $project) }}" class="btn">Bearbeiten</a>@endcan
         @can('projects.create')<form method="post" action="{{ route('projects.duplicate', $project) }}" class="inline">@csrf<button class="btn">Duplizieren</button></form>@endcan
         @can('projects.delete')<x-delete :action="route('projects.destroy', $project)" confirm="Projekt löschen?" />@endcan
@@ -71,6 +74,11 @@
             @if ($transitions)<div class="card"><div class="card-h"><h2>Status</h2></div><div class="card-b flex flex-wrap gap-2">
                 @foreach ($transitions as $t)<form method="post" action="{{ route('projects.status', $project) }}">@csrf<input type="hidden" name="status" value="{{ $t }}"><button class="btn btn-sm {{ in_array($t, ['confirmed', 'loaded']) ? 'btn-primary' : '' }}">→ {{ \App\Models\Project::STATUSES[$t] }}</button></form>@endforeach</div></div>@endif
             @endcan
+            <div class="card"><div class="card-h"><h2>Transport</h2></div><div class="card-b text-sm">
+                <div>Gesamtgewicht: <b>{{ number_format($weightKg, 0, ',', '.') }} kg</b> · Leistung: <b>{{ number_format($powerW / 1000, 1, ',', '.') }} kW</b></div>
+                @foreach ($vehicles as $v)<div class="mt-1 {{ $weightKg > $v->max_load_kg ? 'text-red-600' : 'text-green-700' }}">{{ $weightKg > $v->max_load_kg ? '✕' : '✓' }} {{ $v->name }} ({{ number_format($v->max_load_kg, 0, ',', '.') }} kg){{ $weightKg > $v->max_load_kg ? ' – zu schwer' : '' }}</div>@endforeach
+                @if ($project->signed_at)<div class="mt-2 text-xs text-slate-500">Unterschrieben von {{ $project->signed_by }} am {{ $project->signed_at->format('d.m.Y H:i') }}</div>@endif
+            </div></div>
             <div class="card"><dl class="dl card-b">
                 <dt>Leitung</dt><dd>{{ $project->manager?->name ?: '—' }}</dd>
                 <dt>Ort</dt><dd>{{ $project->venue ?: ($project->venueLocation?->name ?: '—') }}</dd>

@@ -1,6 +1,11 @@
 <?php
 
+use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\IcalController;
+use App\Http\Controllers\PassController;
+use App\Http\Controllers\ProjectExtrasController;
+use App\Http\Controllers\RiderController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetModelController;
 use App\Http\Controllers\AttachmentController;
@@ -24,6 +29,10 @@ use App\Http\Controllers\StocktakeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Öffentlich (tokenbasiert / minimal): Kalender-Abo und Gerätepass
+Route::get('/ical/{token}.ics', [IcalController::class, 'feed'])->where('token', '[A-Za-z0-9]{20,64}')->middleware('throttle:30,1')->name('ical.feed');
+Route::get('/pass/{uuid}', [PassController::class, 'show'])->middleware('throttle:60,1')->name('pass');
+
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:20,1');
@@ -44,6 +53,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/2fa', [ProfileController::class, 'twoFactorDisable'])->name('2fa.disable');
         Route::post('/tokens', [ProfileController::class, 'tokenCreate'])->name('tokens.create');
         Route::delete('/tokens/{id}', [ProfileController::class, 'tokenDelete'])->name('tokens.delete');
+        Route::post('/ical', [IcalController::class, 'regenerate'])->name('ical.regenerate');
+        Route::delete('/ical', [IcalController::class, 'revoke'])->name('ical.revoke');
     });
 
     Route::get('/', DashboardController::class)->name('dashboard');
@@ -76,6 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:assets.checkout')->group(function () {
         Route::get('/assets/{asset}/checkout', [CheckoutController::class, 'form'])->name('assets.checkout');
         Route::post('/assets/{asset}/checkout', [CheckoutController::class, 'store'])->name('assets.checkout.store');
+        Route::post('/assets/{asset}/hours', [AssetController::class, 'hours'])->name('assets.hours');
         Route::post('/checkouts/{checkout}/checkin', [CheckoutController::class, 'checkin'])->name('checkouts.checkin');
         Route::get('/checkouts/open', [CheckoutController::class, 'overdue'])->name('checkouts.open');
     });
@@ -146,11 +158,17 @@ Route::middleware('auth')->group(function () {
         Route::delete('/projects/{project}/items/{item}', [ProjectController::class, 'removeItem'])->name('projects.items.remove');
         Route::post('/projects/{project}/template', [ProjectController::class, 'applyTemplate'])->name('projects.template.apply');
         Route::post('/projects/{project}/save-template', [ProjectController::class, 'saveAsTemplate'])->name('projects.template.save');
+        Route::get('/projects/{project}/rider', [RiderController::class, 'form'])->name('projects.rider');
+        Route::post('/projects/{project}/rider', [RiderController::class, 'parse'])->name('projects.rider.parse')->middleware('throttle:20,1');
+        Route::post('/projects/{project}/rider/apply', [RiderController::class, 'apply'])->name('projects.rider.apply');
     });
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy')->middleware('can:projects.delete');
     Route::middleware('can:projects.pack')->group(function () {
         Route::get('/projects/{project}/pack', [ProjectController::class, 'pack'])->name('projects.pack');
         Route::post('/projects/{project}/pack', [ProjectController::class, 'packScan'])->name('projects.pack.scan')->middleware('throttle:240,1');
+        Route::post('/projects/{project}/photo', [ProjectExtrasController::class, 'photo'])->name('projects.photo');
+        Route::get('/projects/{project}/signature', [ProjectExtrasController::class, 'signatureForm'])->name('projects.signature');
+        Route::post('/projects/{project}/signature', [ProjectExtrasController::class, 'signatureStore'])->name('projects.signature.store');
     });
 
     // Packlisten-Vorlagen
@@ -200,6 +218,11 @@ Route::middleware('auth')->group(function () {
 
     // ── Berichte / Audit / Admin ────────────────────────────
     Route::get('/reports', [ReportController::class, 'index'])->name('reports')->middleware('can:reports.view');
+    Route::middleware('can:reports.view')->prefix('accounting')->name('accounting.')->group(function () {
+        Route::get('/afa', [AccountingController::class, 'afa'])->name('afa');
+        Route::get('/revenue', [AccountingController::class, 'revenue'])->name('revenue');
+        Route::get('/invoice/{project}', [AccountingController::class, 'invoice'])->name('invoice');
+    });
     Route::get('/audit', [AuditController::class, 'index'])->name('audit.index')->middleware('can:audit.view');
     Route::middleware('can:users.manage')->group(function () {
         Route::resource('users', UserController::class)->except('show');
@@ -207,5 +230,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware('can:settings.manage')->group(function () {
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/webhook-test', [SettingsController::class, 'webhookTest'])->name('settings.webhook-test');
     });
 });

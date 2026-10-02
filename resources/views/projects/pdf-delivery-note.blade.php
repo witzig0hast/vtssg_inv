@@ -10,5 +10,5 @@ body{font-family:DejaVu Sans,sans-serif;font-size:10px;color:#111}h1{font-size:1
 @foreach ($items as $i)@php $n++; $line = $i->unitPriceCents() * $i->quantity * $project->rentalDays(); $sum += $line; @endphp
 <tr><td>{{ $n }}</td><td>{{ $i->label() }}@if($i->is_external) (Zumiete)@endif</td><td class="r">{{ $i->quantity }}</td><td class="r">{{ \App\Support\Money::format($i->unitPriceCents()) }}</td><td class="r">{{ $project->rentalDays() }}</td><td class="r">{{ \App\Support\Money::format($line) }}</td></tr>@endforeach @endforeach
 </tbody><tfoot><tr><td colspan="5" class="r"><b>Summe netto</b></td><td class="r"><b>{{ \App\Support\Money::format($sum) }}</b></td></tr></tfoot></table>
-<div class="sig"><div>Ausgegeben (Datum, Unterschrift)</div><div>Empfangen (Datum, Unterschrift)</div></div>
+<div class="sig"><div>Ausgegeben (Datum, Unterschrift)</div><div>@if($signature)<img src="{{ $signature }}" style="height:40px"><br>@endif Empfangen @if($project->signed_by)— {{ $project->signed_by }}, {{ $project->signed_at?->format('d.m.Y H:i') }}@else(Datum, Unterschrift)@endif</div></div>
 </body></html>

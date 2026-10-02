@@ -22,10 +22,12 @@ class NotifyDue extends Command
         $soon = Asset::with('model.manufacturer')->whereBetween('next_inspection_due', [today(), today()->addDays($warn)])->orderBy('next_inspection_due')->get();
         $low = Consumable::whereColumn('quantity', '<=', 'min_quantity')->where('min_quantity', '>', 0)->get();
 
-        if ($overdue->isEmpty() && $soon->isEmpty() && $low->isEmpty()) {
+        $late = \App\Models\Checkout::with('asset.model')->whereNull('returned_at')->where('expected_return_at', '<', now())->orderBy('expected_return_at')->get();
+
+        if ($overdue->isEmpty() && $soon->isEmpty() && $low->isEmpty() && $late->isEmpty()) {
             return self::SUCCESS;
         }
-        $n = new InspectionsDue($overdue, $soon, $low);
+        $n = new InspectionsDue($overdue, $soon, $low, $late);
         $users = User::role(['Administrator', 'Lager'])->where('is_active', true)->get();
         Notification::send($users, $n);
         if ($extra = Setting::get('notify_email')) {

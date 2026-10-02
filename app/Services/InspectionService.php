@@ -29,6 +29,7 @@ class InspectionService
         $inspection = Inspection::create($data + ['asset_id' => $asset->id, 'performed_by' => $by?->id]);
 
         if ($inspection->result === 'failed') {
+            Webhook::fire('inspection.failed', ['asset_tag' => $asset->asset_tag, 'type' => $type->code]);
             $this->checkouts->reportDefect($asset, $by, "Prüfung nicht bestanden: {$type->name}", $inspection->notes, null, 'critical');
         }
         $asset->refresh()->load('model.inspectionTypes');
