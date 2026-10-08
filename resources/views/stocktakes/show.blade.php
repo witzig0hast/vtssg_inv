@@ -9,8 +9,8 @@
                 <p class="hint mt-2">Nach dem Scannen Seite neu laden, um die Listen zu aktualisieren.</p></div>
             @endif
             <ul id="pack-log" class="space-y-2"></ul>
-            <div class="card"><div class="card-h"><h2>Gefunden ({{ $found->count() }})</h2></div><ul class="divide-y divide-slate-100 text-sm">@foreach ($found as $l)<li class="px-5 py-2">{{ $l->asset->asset_tag }} · {{ $l->asset->model->full_name }}@if ($l->expected_quantity === 0) <x-badge color="#d97706">unerwartet</x-badge>@endif</li>@endforeach</ul></div>
+            <div class="card"><div class="card-h"><h2>Gefunden ({{ $found->count() }})</h2></div><ul class="divide-y divide-zinc-100 text-sm">@foreach ($found as $l)<li class="px-5 py-2">{{ $l->asset->asset_tag }} · {{ $l->asset->model->full_name }}@if ($l->expected_quantity === 0) <x-badge color="#d97706">unerwartet</x-badge>@endif</li>@endforeach</ul></div>
         </div>
-        <div class="card"><div class="card-h"><h2>Fehlend ({{ $missing->where('expected_quantity', '>', 0)->count() }})</h2></div><ul class="divide-y divide-slate-100 text-sm">@foreach ($missing->where('expected_quantity', '>', 0) as $l)<li class="px-5 py-2"><a href="{{ route('assets.show', $l->asset) }}">{{ $l->asset->asset_tag }}</a> · {{ $l->asset->model->full_name }}</li>@endforeach</ul></div>
+        <div class="card"><div class="card-h"><h2>Fehlend ({{ $missing->where('expected_quantity', '>', 0)->count() }})</h2></div><ul class="divide-y divide-zinc-100 text-sm">@foreach ($missing->where('expected_quantity', '>', 0) as $l)<li class="px-5 py-2"><a href="{{ route('assets.show', $l->asset) }}">{{ $l->asset->asset_tag }}</a> · {{ $l->asset->model->full_name }}</li>@endforeach</ul></div>
     </div>
 </x-layout>

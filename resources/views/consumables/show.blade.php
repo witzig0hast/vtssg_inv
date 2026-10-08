@@ -4,7 +4,7 @@
     </x-page-head>
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6">
-            <div class="card card-b text-center"><div class="text-5xl font-semibold {{ $c->isLow() ? 'text-red-600' : '' }}">{{ $c->quantity }}</div><div class="text-slate-500">{{ $c->unit }} · Minimum {{ $c->min_quantity }}</div></div>
+            <div class="card card-b text-center"><div class="text-5xl font-semibold {{ $c->isLow() ? 'text-red-600' : '' }}">{{ $c->quantity }}</div><div class="text-zinc-500">{{ $c->unit }} · Minimum {{ $c->min_quantity }}</div></div>
             @can('consumables.manage')
             <div class="card"><div class="card-h"><h2>Buchung</h2></div>
                 <form method="post" action="{{ route('consumables.movement', $c) }}" class="card-b space-y-3">@csrf
@@ -18,6 +18,6 @@
         </div>
         <div class="card lg:col-span-2"><div class="card-h"><h2>Bewegungen</h2></div>
             <table class="tbl"><thead><tr><th>Wann</th><th>Art</th><th class="text-right">Menge</th><th>Von</th><th>Notiz</th></tr></thead><tbody>
-                @forelse ($movements as $m)<tr><td class="whitespace-nowrap">{{ $m->created_at->format('d.m.Y H:i') }}</td><td>{{ \App\Models\Consumable::REASONS[$m->reason] }}</td><td class="text-right {{ $m->delta < 0 ? 'text-red-600' : 'text-green-600' }}">{{ $m->delta > 0 ? '+' : '' }}{{ $m->delta }}</td><td>{{ $m->user?->name }}</td><td>{{ $m->note }}</td></tr>@empty<tr><td colspan="5" class="text-slate-500">Keine Bewegungen.</td></tr>@endforelse</tbody></table></div>
+                @forelse ($movements as $m)<tr><td class="whitespace-nowrap">{{ $m->created_at->format('d.m.Y H:i') }}</td><td>{{ \App\Models\Consumable::REASONS[$m->reason] }}</td><td class="text-right {{ $m->delta < 0 ? 'text-red-600' : 'text-green-600' }}">{{ $m->delta > 0 ? '+' : '' }}{{ $m->delta }}</td><td>{{ $m->user?->name }}</td><td>{{ $m->note }}</td></tr>@empty<tr><td colspan="5" class="text-zinc-500">Keine Bewegungen.</td></tr>@endforelse</tbody></table></div>
     </div>
 </x-layout>

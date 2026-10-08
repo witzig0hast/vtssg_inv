@@ -22,7 +22,7 @@
                         @endif
                     </td>
                 </tr>
-            @empty<tr><td colspan="{{ count($def['columns']) + 1 }}" class="py-8 text-center text-slate-500">Noch keine Einträge.</td></tr>@endforelse
+            @empty<tr><td colspan="{{ count($def['columns']) + 1 }}" class="py-8 text-center text-zinc-500">Noch keine Einträge.</td></tr>@endforelse
             </tbody>
         </table>
     </div>

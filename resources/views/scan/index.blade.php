@@ -14,8 +14,8 @@
             <ul id="scan-log" class="space-y-2"></ul>
             <div class="card card-b mt-6">
                 <h3 class="mb-2">Packen für ein Projekt</h3>
-                <ul class="divide-y divide-slate-100 text-sm">
-                    @forelse ($projects as $p)<li class="flex items-center justify-between py-2"><span>{{ $p->number }} · {{ $p->name }}</span>@can('projects.pack')<a class="btn btn-sm" href="{{ route('projects.pack', $p) }}">Packen / Rückbau</a>@endcan</li>@empty<li class="py-2 text-slate-500">Keine aktiven Projekte.</li>@endforelse
+                <ul class="divide-y divide-zinc-100 text-sm">
+                    @forelse ($projects as $p)<li class="flex items-center justify-between py-2"><span>{{ $p->number }} · {{ $p->name }}</span>@can('projects.pack')<a class="btn btn-sm" href="{{ route('projects.pack', $p) }}">Packen / Rückbau</a>@endcan</li>@empty<li class="py-2 text-zinc-500">Keine aktiven Projekte.</li>@endforelse
                 </ul>
             </div>
         </div>

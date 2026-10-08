@@ -8,10 +8,10 @@
     <title>{{ $title ?? 'Anmelden' }} · {{ \App\Models\Setting::get('company_name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="flex min-h-screen items-center justify-center bg-gradient-to-br from-brand-900 to-slate-900 p-4">
+<body class="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
 <div class="w-full max-w-sm">
-    <div class="mb-6 text-center text-white"><img src="/icon.svg" alt="" class="mx-auto mb-3 h-14 w-14"><div class="text-xl font-semibold">{{ \App\Models\Setting::get('company_name') }}</div><div class="text-sm text-slate-400">Inventarverwaltung</div></div>
-    <div class="card card-b">{{ $slot }}</div>
+    <div class="mb-8 text-center"><img src="/icon.svg" alt="" class="mx-auto mb-4 h-12 w-12"><div class="text-xl font-semibold tracking-tight text-zinc-950">{{ \App\Models\Setting::get('company_name') }}</div><div class="text-sm text-zinc-500">Inventarverwaltung</div></div>
+    <div class="card card-b shadow-sm">{{ $slot }}</div>
 </div>
 </body>
 </html>

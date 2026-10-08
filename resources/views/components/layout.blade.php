@@ -6,22 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex,nofollow">
-    <meta name="theme-color" content="#1e1b4b">
+    <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <title>{{ $title ? $title.' · ' : '' }}{{ \App\Models\Setting::get('company_name') }} Inventar</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-zinc-50/60">
 @php
     $u = auth()->user();
     $link = fn ($route, $label, $icon, $perm = null, $match = null) => ($perm === null || $u->can($perm))
         ? '<a href="'.e(route($route)).'" class="nav-link '.(request()->routeIs(...explode('|', $match ?? $route.'*')) ? 'active' : '').'"><span class="w-5 text-center">'.$icon.'</span>'.e($label).'</a>' : '';
 @endphp
 <div class="flex min-h-screen">
-    <aside id="sidebar" class="hidden w-64 shrink-0 flex-col bg-brand-900 px-3 py-4 text-white lg:flex print:hidden fixed inset-y-0 z-30 overflow-y-auto lg:sticky lg:top-0 lg:h-screen">
-        <a href="{{ route('dashboard') }}" class="mb-4 flex items-center gap-2 px-3 text-white hover:text-white">
-            <img src="/icon.svg" alt="" class="h-8 w-8"><span class="min-w-0 break-words text-sm font-semibold leading-tight">{{ \App\Models\Setting::get('company_name') }}<span class="block text-xs font-normal text-slate-400">Inventar</span></span>
+    <aside id="sidebar" class="fixed inset-y-0 z-30 hidden w-60 shrink-0 flex-col overflow-y-auto border-r border-zinc-200 bg-white px-3 py-5 lg:sticky lg:top-0 lg:flex lg:h-screen print:hidden">
+        <a href="{{ route('dashboard') }}" class="mb-5 flex items-center gap-2.5 px-3 text-zinc-950 no-underline hover:text-zinc-950">
+            <img src="/icon.svg" alt="" class="h-8 w-8 shrink-0"><span class="min-w-0 break-words text-sm font-semibold leading-tight tracking-tight">{{ \App\Models\Setting::get('company_name') }}<span class="block text-xs font-normal text-zinc-500">Inventar</span></span>
         </a>
         {!! $link('dashboard', 'Übersicht', '⌂', null, 'dashboard') !!}
         {!! $link('scan', 'Scannen', '▣', 'assets.view') !!}
@@ -57,21 +57,21 @@
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-        <header class="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur print:hidden">
+        <header class="sticky top-0 z-20 flex items-center gap-3 border-b border-zinc-200 bg-white/90 px-4 py-2.5 backdrop-blur print:hidden">
             <button type="button" data-toggle-nav class="btn btn-sm lg:hidden" aria-label="Menü">☰</button>
             <form action="{{ route('search') }}" method="get" class="flex-1 max-w-xl">
                 <input type="search" name="q" value="{{ request('q') }}" placeholder="Suchen: Asset-Tag, Seriennummer, Modell, Projekt …" class="input" autocomplete="off" aria-label="Suche">
             </form>
             @can('assets.view')<a href="{{ route('scan') }}" class="btn btn-primary btn-sm">▣ Scan</a>@endcan
             <div class="ml-auto flex items-center gap-3 text-sm">
-                <a href="{{ route('profile.edit') }}" class="hidden text-slate-600 hover:text-slate-900 sm:inline">{{ $u->name }}</a>
+                <a href="{{ route('profile.edit') }}" class="hidden text-zinc-600 hover:text-zinc-950 sm:inline">{{ $u->name }}</a>
                 <form method="post" action="{{ route('logout') }}">@csrf<button class="btn btn-sm">Abmelden</button></form>
             </div>
         </header>
 
-        <main class="mx-auto w-full {{ $wide ? 'max-w-none' : 'max-w-7xl' }} flex-1 px-4 py-6 sm:px-6">
-            @if (session('status'))<div class="alert mb-4 border-green-200 bg-green-50 text-green-800" role="status">{{ session('status') }}</div>@endif
-            @if (session('warning'))<div class="alert mb-4 border-amber-200 bg-amber-50 text-amber-800" role="status">{{ session('warning') }}</div>@endif
+        <main class="mx-auto w-full {{ $wide ? 'max-w-none' : 'max-w-7xl' }} flex-1 px-4 py-8 sm:px-8">
+            @if (session('status'))<div class="alert mb-4 border-zinc-300 bg-zinc-50 text-zinc-900" role="status">{{ session('status') }}</div>@endif
+            @if (session('warning'))<div class="alert mb-4 border-amber-300 bg-amber-50 text-amber-900" role="status">{{ session('warning') }}</div>@endif
             @php $globalErrors = collect($errors->getMessages())->only(['delete', 'checkout', 'checkin', 'status', 'item', 'file', 'role', 'quantity', 'asset_tag', 'import', 'general'])->flatten(); @endphp
             @if ($globalErrors->isNotEmpty())
                 <div class="alert mb-4 border-red-200 bg-red-50 text-red-800" role="alert">

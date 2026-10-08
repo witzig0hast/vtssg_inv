@@ -21,23 +21,23 @@
             <table class="tbl">
                 <thead><tr>
                     <th class="w-8"><input type="checkbox" data-check-all aria-label="Alle"></th>
-                    <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'asset_tag', 'dir' => request('dir') === 'asc' ? 'desc' : 'asc']) }}" class="text-slate-500">Tag</a></th>
+                    <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'asset_tag', 'dir' => request('dir') === 'asc' ? 'desc' : 'asc']) }}" class="text-zinc-500">Tag</a></th>
                     <th>Modell</th><th>Seriennr.</th><th>Status</th><th>Standort</th><th>Menge</th>
-                    <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'next_inspection_due', 'dir' => request('dir') === 'asc' ? 'desc' : 'asc']) }}" class="text-slate-500">Nächste Prüfung</a></th>
+                    <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'next_inspection_due', 'dir' => request('dir') === 'asc' ? 'desc' : 'asc']) }}" class="text-zinc-500">Nächste Prüfung</a></th>
                 </tr></thead>
                 <tbody>
                 @forelse ($assets as $a)
                     <tr>
                         <td><input type="checkbox" name="ids[]" value="{{ $a->id }}" aria-label="{{ $a->asset_tag }}"></td>
                         <td class="whitespace-nowrap font-medium"><a href="{{ route('assets.show', $a) }}">{{ $a->asset_tag }}</a>@if ($a->is_blocked) <span title="{{ $a->blocked_reason }}">🔒</span>@endif @if ($a->is_container)<span title="Case/Kit">▣</span>@endif</td>
-                        <td>{{ $a->model->full_name }}<div class="text-xs text-slate-500">{{ $a->model->category->name }}@if($a->name) · {{ $a->name }}@endif</div></td>
-                        <td class="text-slate-600">{{ $a->serial }}</td>
+                        <td>{{ $a->model->full_name }}<div class="text-xs text-zinc-500">{{ $a->model->category->name }}@if($a->name) · {{ $a->name }}@endif</div></td>
+                        <td class="text-zinc-600">{{ $a->serial }}</td>
                         <td>@include('partials.status-badge', ['status' => $a->status])</td>
-                        <td class="text-slate-600">{{ $a->location?->name }}</td>
+                        <td class="text-zinc-600">{{ $a->location?->name }}</td>
                         <td>{{ $a->model->isQuantity() ? $a->availableQuantity().' / '.$a->quantity : '' }}</td>
                         <td>@if ($a->next_inspection_due)<x-badge :color="$a->next_inspection_due->isPast() ? '#dc2626' : ($a->next_inspection_due->diffInDays(today()) <= 30 ? '#d97706' : '#16a34a')">{{ $a->next_inspection_due->format('d.m.Y') }}</x-badge>@endif</td>
                     </tr>
-                @empty<tr><td colspan="8" class="py-8 text-center text-slate-500">Keine Assets gefunden.</td></tr>@endforelse
+                @empty<tr><td colspan="8" class="py-8 text-center text-zinc-500">Keine Assets gefunden.</td></tr>@endforelse
                 </tbody>
             </table>
         </div>

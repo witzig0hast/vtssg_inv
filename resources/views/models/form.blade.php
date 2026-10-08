@@ -23,9 +23,9 @@
         <div class="grid gap-2 md:grid-cols-2">
             @foreach ($inspectionTypes as $t)
                 @php $sel = $m->exists ? $m->inspectionTypes->firstWhere('id', $t->id) : null; @endphp
-                <label class="flex items-center gap-3 rounded-lg border border-slate-200 p-3 text-sm">
-                    <input type="checkbox" name="inspection_enabled[{{ $t->id }}]" value="1" @checked(old('inspection_enabled.'.$t->id, (bool) $sel)) class="h-4 w-4 rounded border-slate-300">
-                    <span class="flex-1">{{ $t->name }}<span class="block text-xs text-slate-500">Standard {{ $t->default_interval_months }} Monate{{ $t->blocks_checkout ? ' · sperrt Ausgabe' : '' }}</span></span>
+                <label class="flex items-center gap-3 rounded-lg border border-zinc-200 p-3 text-sm">
+                    <input type="checkbox" name="inspection_enabled[{{ $t->id }}]" value="1" @checked(old('inspection_enabled.'.$t->id, (bool) $sel)) class="h-4 w-4 rounded border-zinc-300">
+                    <span class="flex-1">{{ $t->name }}<span class="block text-xs text-zinc-500">Standard {{ $t->default_interval_months }} Monate{{ $t->blocks_checkout ? ' · sperrt Ausgabe' : '' }}</span></span>
                     <input type="number" min="1" max="120" name="inspection_types[{{ $t->id }}]" value="{{ old('inspection_types.'.$t->id, $sel?->pivot->interval_months) }}" placeholder="Mon." class="input w-20" aria-label="Intervall">
                 </label>
             @endforeach

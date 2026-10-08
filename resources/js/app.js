@@ -119,7 +119,7 @@ if (scanForm) {
         const badge = a.deployable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
         card.innerHTML = '';
         const h = document.createElement('div');
-        h.innerHTML = '<div class="flex items-start justify-between gap-3"><div><div class="text-xs text-slate-500" data-f="tag"></div><div class="text-lg font-semibold" data-f="name"></div><div class="text-sm text-slate-500" data-f="meta"></div></div><span class="badge ' + badge + '" data-f="status"></span></div><dl class="dl mt-4"><dt>Standort</dt><dd data-f="loc"></dd><dt>Ausgegeben an</dt><dd data-f="out"></dd><dt>Nächste Prüfung</dt><dd data-f="due"></dd></dl><ul class="mt-3 list-disc pl-5 text-sm text-slate-600" data-f="contents"></ul><div class="mt-4 flex flex-wrap gap-2" data-f="actions"></div>';
+        h.innerHTML = '<div class="flex items-start justify-between gap-3"><div><div class="text-xs text-zinc-500" data-f="tag"></div><div class="text-lg font-semibold" data-f="name"></div><div class="text-sm text-zinc-500" data-f="meta"></div></div><span class="badge ' + badge + '" data-f="status"></span></div><dl class="dl mt-4"><dt>Standort</dt><dd data-f="loc"></dd><dt>Ausgegeben an</dt><dd data-f="out"></dd><dt>Nächste Prüfung</dt><dd data-f="due"></dd></dl><ul class="mt-3 list-disc pl-5 text-sm text-zinc-600" data-f="contents"></ul><div class="mt-4 flex flex-wrap gap-2" data-f="actions"></div>';
         const set = (f, t) => { $('[data-f=' + f + ']', h).textContent = t; };
         set('tag', a.tag); set('name', a.name); set('meta', a.serial ? 'SN ' + a.serial : ''); set('status', a.status);
         set('loc', a.location || '—'); set('out', a.checked_out_to || '— (im Lager)');

@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ['Einsatzbereit', 'deployable', '#16a34a', true],
             ['In Klärung', 'pending', '#d97706', false],
             ['In Reparatur / defekt', 'undeployable', '#dc2626', false],
-            ['Ausgemustert', 'archived', '#64748b', false],
+            ['Ausgemustert', 'archived', '#71717a', false],
             ['Verloren / gestohlen', 'archived', '#7f1d1d', false],
         ] as [$name, $kind, $color, $default]) {
             StatusLabel::firstOrCreate(['name' => $name], ['kind' => $kind, 'color' => $color, 'is_default' => $default]);

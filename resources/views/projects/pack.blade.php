@@ -7,13 +7,13 @@
         <div class="space-y-4">
             <div class="card card-b space-y-3">
                 <div class="flex gap-2">
-                    <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 p-3 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"><input type="radio" name="mode" value="load" checked> <b>Beladen</b></label>
-                    <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 p-3 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"><input type="radio" name="mode" value="unload"> <b>Rückbau</b></label>
+                    <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-zinc-300 p-3 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"><input type="radio" name="mode" value="load" checked> <b>Beladen</b></label>
+                    <label class="flex flex-1 cursor-pointer items-center gap-2 rounded-lg border border-zinc-300 p-3 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"><input type="radio" name="mode" value="unload"> <b>Rückbau</b></label>
                 </div>
                 <div class="flex gap-2"><input id="pack-code" class="input text-lg" placeholder="Code scannen…" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="btn" data-camera-for="pack-code">📷</button><button type="button" id="pack-submit" class="btn btn-primary">OK</button></div>
                 <select id="pack-condition" class="input"><option value="ok">Rückbau: Zustand in Ordnung</option><option value="worn">Rückbau: Gebrauchsspuren</option><option value="damaged">Rückbau: defekt → Ticket</option></select>
                 <div><div class="mb-1 flex justify-between text-sm"><span>Fortschritt</span><span id="pack-progress">{{ $items->sum('packed_quantity') }} / {{ $items->sum('quantity') }}</span></div>
-                    <div class="h-3 overflow-hidden rounded-full bg-slate-200"><div id="pack-bar" class="h-full bg-brand-600 transition-all" style="width: {{ $items->sum('quantity') ? round($items->sum('packed_quantity') / $items->sum('quantity') * 100) : 0 }}%"></div></div></div>
+                    <div class="h-3 overflow-hidden rounded-full bg-zinc-200"><div id="pack-bar" class="h-full bg-brand-600 transition-all" style="width: {{ $items->sum('quantity') ? round($items->sum('packed_quantity') / $items->sum('quantity') * 100) : 0 }}%"></div></div></div>
             </div>
             <form method="post" action="{{ route('projects.photo', $project) }}" enctype="multipart/form-data" class="card card-b flex flex-wrap items-center gap-2">@csrf
                 <span class="text-sm font-medium">Beladefoto (Case-Check)</span>

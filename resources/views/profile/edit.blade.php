@@ -33,15 +33,15 @@
                         <button class="btn btn-danger" @disabled(config('inventory.require_2fa'))>2FA deaktivieren</button>
                     </form>
                 @elseif ($setup)
-                    <p class="text-sm text-slate-600">Scanne den QR-Code mit einer Authenticator-App (z. B. Aegis, 2FAS, Google Authenticator) und gib den Code ein.</p>
-                    <img src="{{ $setup['qr'] }}" alt="QR-Code für 2FA" class="h-48 w-48 rounded border border-slate-200">
-                    <p class="text-xs text-slate-500">Manueller Schlüssel: <code class="font-mono">{{ $setup['secret'] }}</code></p>
+                    <p class="text-sm text-zinc-600">Scanne den QR-Code mit einer Authenticator-App (z. B. Aegis, 2FAS, Google Authenticator) und gib den Code ein.</p>
+                    <img src="{{ $setup['qr'] }}" alt="QR-Code für 2FA" class="h-48 w-48 rounded border border-zinc-200">
+                    <p class="text-xs text-zinc-500">Manueller Schlüssel: <code class="font-mono">{{ $setup['secret'] }}</code></p>
                     <form method="post" action="{{ route('profile.2fa.confirm') }}" class="flex items-end gap-2">@csrf
                         <x-input name="code" label="6-stelliger Code" inputmode="numeric" autocomplete="one-time-code" class="flex-1" />
                         <button class="btn btn-primary">Aktivieren</button>
                     </form>
                 @else
-                    <p class="text-sm text-slate-600">Schütze dein Konto zusätzlich mit einem Einmalcode.</p>
+                    <p class="text-sm text-zinc-600">Schütze dein Konto zusätzlich mit einem Einmalcode.</p>
                     <form method="post" action="{{ route('profile.2fa.start') }}">@csrf<button class="btn btn-primary">2FA einrichten</button></form>
                 @endif
             </div>
@@ -50,11 +50,11 @@
         @can('projects.view')
         <div class="card"><div class="card-h"><h2>Kalender-Abo (iCal)</h2></div>
             <div class="card-b space-y-3 text-sm">
-                @if ($user->ical_token)<p>Abonniere diese URL in Outlook/Google/Apple-Kalender:</p><code class="block break-all rounded bg-slate-100 p-2 text-xs">{{ route('ical.feed', $user->ical_token) }}</code>
+                @if ($user->ical_token)<p>Abonniere diese URL in Outlook/Google/Apple-Kalender:</p><code class="block break-all rounded bg-zinc-100 p-2 text-xs">{{ route('ical.feed', $user->ical_token) }}</code>
                     <div class="flex gap-2"><form method="post" action="{{ route('profile.ical.regenerate') }}">@csrf<button class="btn btn-sm">Neuen Link erzeugen</button></form>
                     <form method="post" action="{{ route('profile.ical.revoke') }}">@csrf @method('DELETE')<button class="btn btn-sm btn-danger">Widerrufen</button></form></div>
                     <p class="hint">Wer den Link kennt, sieht Projekttermine (ohne Anmeldung). Bei Verdacht auf Weitergabe neu erzeugen.</p>
-                @else<p class="text-slate-600">Projekttermine im eigenen Kalender anzeigen.</p><form method="post" action="{{ route('profile.ical.regenerate') }}">@csrf<button class="btn btn-primary btn-sm">Link erzeugen</button></form>@endif
+                @else<p class="text-zinc-600">Projekttermine im eigenen Kalender anzeigen.</p><form method="post" action="{{ route('profile.ical.regenerate') }}">@csrf<button class="btn btn-primary btn-sm">Link erzeugen</button></form>@endif
             </div></div>
         @endcan
 
@@ -64,9 +64,9 @@
                 <form method="post" action="{{ route('profile.tokens.create') }}" class="flex items-end gap-2">@csrf
                     <x-input name="token_name" label="Bezeichnung" class="flex-1" placeholder="z. B. Handscanner Lager" /><button class="btn">Token erstellen</button>
                 </form>
-                <ul class="divide-y divide-slate-100 text-sm">
-                    @forelse ($tokens as $t)<li class="flex items-center justify-between py-2"><span>{{ $t->name }} <span class="text-xs text-slate-500">· läuft ab {{ $t->expires_at?->format('d.m.Y') }}</span></span>
-                        <x-delete :action="route('profile.tokens.delete', $t->id)" confirm="Token löschen?" /></li>@empty<li class="py-2 text-slate-500">Keine Tokens.</li>@endforelse
+                <ul class="divide-y divide-zinc-100 text-sm">
+                    @forelse ($tokens as $t)<li class="flex items-center justify-between py-2"><span>{{ $t->name }} <span class="text-xs text-zinc-500">· läuft ab {{ $t->expires_at?->format('d.m.Y') }}</span></span>
+                        <x-delete :action="route('profile.tokens.delete', $t->id)" confirm="Token löschen?" /></li>@empty<li class="py-2 text-zinc-500">Keine Tokens.</li>@endforelse
                 </ul>
                 <p class="hint">Nutzung: <code>Authorization: Bearer &lt;token&gt;</code> auf <code>/api/v1/…</code></p>
             </div>

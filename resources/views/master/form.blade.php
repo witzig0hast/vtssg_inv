@@ -16,7 +16,7 @@
             @elseif ($type === 'checkbox')
                 <x-checkbox :name="$name" :label="$label" :checked="(bool) $row->{$name}" />
             @else
-                <x-input :name="$name" :label="$label" :type="$type" :value="$row->{$name} ?? ($type === 'color' ? '#64748b' : null)" :required="$required" />
+                <x-input :name="$name" :label="$label" :type="$type" :value="$row->{$name} ?? ($type === 'color' ? '#71717a' : null)" :required="$required" />
             @endif
         @endforeach
         <div class="flex gap-2"><button class="btn btn-primary">Speichern</button><a href="{{ route('master.index', $def['key']) }}" class="btn">Abbrechen</a></div>

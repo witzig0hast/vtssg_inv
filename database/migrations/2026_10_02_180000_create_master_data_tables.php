@@ -77,7 +77,7 @@ return new class extends Migration
             $table->string('name');
             // deployable = ausgebbar, pending, undeployable (defekt/Werkstatt), archived (ausgemustert/verloren)
             $table->string('kind', 20)->default('deployable');
-            $table->string('color', 7)->default('#64748b');
+            $table->string('color', 7)->default('#71717a');
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
