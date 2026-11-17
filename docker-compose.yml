@@ -66,7 +66,7 @@ services:
     image: redis:7-alpine
     command: ["sh", "-c", "exec redis-server --requirepass \"$$(cat /run/secrets/redis_password)\" --appendonly yes --save 300 10 --maxmemory 256mb --maxmemory-policy noeviction"]
     secrets: [redis_password]
-    cap_add: [CHOWN, SETUID, SETGID]
+    user: redis   # direkt als redis-Benutzer (Daten-Volume gehört ihm), keine Zusatzrechte nötig
     volumes: [redisdata:/data]
     read_only: true
     tmpfs: ["/tmp"]
